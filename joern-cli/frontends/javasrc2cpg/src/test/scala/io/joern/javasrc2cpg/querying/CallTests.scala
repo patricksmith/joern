@@ -28,6 +28,10 @@ class CallTests extends JavaSrcCodeToCpgFixture {
       | }
       |
       |class MyObject {
+      |    public static String staticCall(String s) {
+      |        return s;
+      |    }
+      |
       |    public String myMethod(String s) {
       |        return s;
       |    }
@@ -115,24 +119,14 @@ class CallTests extends JavaSrcCodeToCpgFixture {
     call.name shouldBe "myMethod"
     call.methodFullName shouldBe "test.MyObject.myMethod:java.lang.String(java.lang.String)"
     call.signature shouldBe "java.lang.String(java.lang.String)"
+    call.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
 
-    val List(fieldAccess: Call, argument: Literal) = call.astChildren.l
+    val List(objName: Identifier, argument: Literal) = call.astChildren.l
 
-    fieldAccess.code shouldBe "myObj.myMethod"
-    fieldAccess.name shouldBe Operators.fieldAccess
-    fieldAccess.methodFullName shouldBe Operators.fieldAccess
-    fieldAccess.order shouldBe 0
-    fieldAccess.argumentIndex shouldBe 0
-
-    val List(identifier: Identifier, fieldIdentifier: FieldIdentifier) = fieldAccess.argument.l
-    identifier.order shouldBe 1
-    identifier.argumentIndex shouldBe 1
-    identifier.code shouldBe "myObj"
-    identifier.name shouldBe "myObj"
-    fieldIdentifier.order shouldBe 2
-    fieldIdentifier.argumentIndex shouldBe 2
-    fieldIdentifier.code shouldBe "myMethod"
-    fieldIdentifier.canonicalName shouldBe "myMethod"
+    objName.order shouldBe 0
+    objName.argumentIndex shouldBe 0
+    objName.code shouldBe "myObj"
+    objName.name shouldBe "myObj"
 
     argument.code shouldBe "\"Hello, world!\""
     argument.order shouldBe 1
@@ -146,6 +140,7 @@ class CallTests extends JavaSrcCodeToCpgFixture {
     call.name shouldBe "foo"
     call.methodFullName shouldBe "test.Bar.foo:java.lang.String(test.MyObject)"
     call.signature shouldBe "java.lang.String(test.MyObject)"
+    call.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
 
     val List(identifier: Identifier, argument: Identifier) = call.argument.l
     identifier.order shouldBe 0
@@ -166,24 +161,15 @@ class CallTests extends JavaSrcCodeToCpgFixture {
     call.name shouldBe "foo"
     call.methodFullName shouldBe "test.Bar.foo:java.lang.String(test.MyObject)"
     call.signature shouldBe "java.lang.String(test.MyObject)"
+    call.dispatchType shouldBe DispatchTypes.DYNAMIC_DISPATCH
 
-    val List(fieldAccess: Call, argument: Identifier) = call.astChildren.l
+    val List(objName: Identifier, argument: Identifier) = call.astChildren.l
 
-    fieldAccess.code shouldBe "this.foo"
-    fieldAccess.name shouldBe Operators.fieldAccess
-    fieldAccess.methodFullName shouldBe Operators.fieldAccess
-    fieldAccess.order shouldBe 0
-    fieldAccess.argumentIndex shouldBe 0
+    objName.order shouldBe 0
+    objName.argumentIndex shouldBe 0
+    objName.name shouldBe "this"
+    objName.code shouldBe "this"
 
-    val List(identifier: Identifier, fieldIdentifier: FieldIdentifier) = fieldAccess.argument.l
-    identifier.order shouldBe 1
-    identifier.argumentIndex shouldBe 1
-    identifier.code shouldBe "this"
-    identifier.name shouldBe "this"
-    fieldIdentifier.order shouldBe 2
-    fieldIdentifier.argumentIndex shouldBe 2
-    fieldIdentifier.code shouldBe "foo"
-    fieldIdentifier.canonicalName shouldBe "foo"
 
     argument.code shouldBe "obj"
     argument.order shouldBe 1
